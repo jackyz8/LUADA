@@ -1,0 +1,21 @@
+{
+  "dg_drift": {
+    "username": "dg_drift",
+    "display_name": "DG DRIFT",
+    "password_hash": "e864e1f1b973de50b3ce876decc9dd52$140d25730aa50ab946744542506fe165ed4ea300117a9612f255426158325e59",
+    "role": "admin",
+    "basic_credits": 987,
+    "premium_credits": 100,
+    "created_at": 1792419937.9242644,
+    "seeded": true
+  },
+  "glory_2026x9": {
+    "username": "glory_2026x9",
+    "display_name": "GLORY 2026X9",
+    "password_hash": "6be65137aa18ceae853994a3e1c0a0d6$3ec95c723115c9f29f6d1afd2a1bbc42cd141a9a98888e7745a5518f14714ab7",
+    "role": "user",
+    "basic_credits": 91,
+    "premium_credits": 100,
+    "created_at": 1792420348.426027
+  }
+}
