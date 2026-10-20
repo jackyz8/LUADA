@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — DG DRIFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050508;
+  --card: rgba(15,15,22,0.85);
+  --border: #2D2D2D;
+  --text: #f8fafc;
+  --muted: #6b7280;
+  --subtle: #a0a0b0;
+  --accent: #F5E6D3;
+  --accent-2: #D4C4A8;
+  --success: #34d399;
+  --danger: #ef4444;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+  --pink: #f472b6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(245,230,211,0.04) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(99,102,241,0.04) 0%, transparent 45%);
+  -webkit-font-smoothing: antialiased;
+}
+code, .mono { font-family: 'Roboto Mono', monospace; }
+
+/* ── Navbar ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(15,15,22,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 16px; letter-spacing: 0.5px;
+}
+.nav-badge {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #0E0E0E; padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+}
+.nav-user { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.nav-name { color: var(--accent); font-weight: 600; }
+
+/* ── Layout ── */
+.layout { display: flex; min-height: calc(100vh - 60px); }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: rgba(15,15,22,0.6);
+  border-right: 1px solid var(--border);
+  padding: 16px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sb-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 10px;
+  background: transparent; border: none;
+  color: var(--subtle); font-size: 13px; font-weight: 500;
+  cursor: pointer; text-align: left; width: 100%;
+  transition: all 0.15s ease; font-family: inherit;
+}
+.sb-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.sb-btn.active {
+  background: linear-gradient(135deg, rgba(245,230,211,0.15), rgba(212,196,168,0.08));
+  color: var(--accent);
+  border: 1px solid rgba(245,230,211,0.2);
+}
+.sb-btn .icon { font-size: 16px; line-height: 1; }
+
+/* ── Main ── */
+.main { flex: 1; padding: 24px; overflow: auto; }
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.section h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.02em; }
+.section .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--accent); margin-bottom: 14px;
+}
+
+/* ── Stats Grid ── */
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px;
+  transition: all 0.2s ease;
+}
+.stat:hover { border-color: #3D3D3D; transform: translateY(-2px); }
+.stat-label {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 6px; font-weight: 600;
+}
+.stat-value {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+}
+.stat-value.gold { color: var(--warning); }
+.stat-value.green { color: var(--success); }
+.stat-value.blue { color: var(--info); }
+.stat-value.pink { color: var(--pink); }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; border-radius: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 12px;
+  background: rgba(0,0,0,0.3);
+  color: var(--muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(45,45,45,0.5);
+  vertical-align: middle;
+}
+tr:hover td { background: rgba(255,255,255,0.02); }
+td code { color: var(--accent); font-size: 12px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.badge-admin { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+.badge-user { background: rgba(96,165,250,0.15); color: var(--info); border: 1px solid rgba(96,165,250,0.3); }
+.badge-active { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); }
+.badge-used { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+.badge-cancelled { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+.badge-online { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); }
+.badge-offline { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+.badge-paused { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all 0.15s ease; font-family: inherit;
+  white-space: nowrap; text-decoration: none;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #0E0E0E;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -4px rgba(245,230,211,0.4);
+}
+.btn-outline {
+  background: transparent; color: #fff;
+  border: 1px solid var(--border);
+}
+.btn-outline:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05); border-color: #3D3D3D;
+}
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover:not(:disabled) { background: #10b981; }
+.btn-danger { background: rgba(239,68,68,0.9); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #dc2626; }
+.btn-info { background: var(--info); color: #fff; }
+.btn-info:hover:not(:disabled) { background: #3b82f6; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-icon { padding: 8px; width: 34px; height: 34px; }
+
+/* ── Forms ── */
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.group { margin-bottom: 12px; }
+.group label {
+  display: block; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 6px; font-weight: 600;
+}
+.input, .select {
+  width: 100%; padding: 10px 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px; color: #fff;
+  font-size: 13px; outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.input:focus, .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(245,230,211,0.1);
+}
+.input::placeholder { color: #4b5563; }
+.select { cursor: pointer; }
+.select option { background: #0f0f16; }
+
+/* ── Toast ── */
+#toasts {
+  position: fixed; top: 20px; right: 20px; z-index: 10000;
+  display: flex; flex-direction: column; gap: 8px;
+  max-width: 340px; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: 10px;
+  background: rgba(15,15,22,0.98);
+  border: 1px solid var(--border);
+  color: #fff; font-size: 13px;
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,0.6);
+  animation: toastIn 0.25s ease;
+  pointer-events: auto;
+}
+.toast.success { border-color: rgba(52,211,153,0.4); }
+.toast.error { border-color: rgba(239,68,68,0.4); }
+.toast.info { border-color: rgba(96,165,250,0.4); }
+.toast.hide { animation: toastOut 0.25s ease forwards; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(20px); }
+}
+
+/* ── Modal ── */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(5,5,8,0.85); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn 0.15s ease;
+}
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  width: 100%; max-width: 460px;
+  max-height: 90vh; overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal h3 {
+  font-size: 16px; font-weight: 700; margin-bottom: 16px;
+  color: var(--accent);
+}
+.modal-actions {
+  display: flex; gap: 10px; margin-top: 16px;
+}
+.modal-actions .btn { flex: 1; padding: 10px; }
+
+/* ── Coupon Code Display ── */
+.code-box {
+  background: rgba(0,0,0,0.5);
+  border: 2px dashed var(--accent);
+  border-radius: 12px; padding: 20px;
+  text-align: center; margin: 16px 0;
+  position: relative;
+}
+.code-box code {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 24px; font-weight: 800;
+  color: var(--accent); letter-spacing: 3px;
+}
+
+/* ── Utilities ── */
+.flex { display: flex; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mb-3 { margin-bottom: 12px; }
+.text-center { text-align: center; }
+.text-muted { color: var(--muted); }
+.text-sm { font-size: 12px; }
+.text-xs { font-size: 11px; }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-info { color: var(--info); }
+.empty {
+  text-align: center; padding: 40px 20px; color: var(--muted);
+}
+.empty .icon { font-size: 40px; margin-bottom: 8px; opacity: 0.4; }
+
+/* ── Loading Overlay ── */
+.loading {
+  position: absolute; inset: 0;
+  background: rgba(5,5,8,0.75);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; z-index: 20;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(245,230,211,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Auth Guard ── */
+#auth-guard {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+#auth-guard .spinner { width: 40px; height: 40px; border-width: 4px; }
+#auth-guard p { color: var(--muted); font-size: 13px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; padding: 16px 6px; }
+  .sb-btn span:not(.icon) { display: none; }
+  .sb-btn { justify-content: center; padding: 12px; }
+  .main { padding: 16px; }
+  .row { grid-template-columns: 1fr; }
+  .nav-brand span:not(.nav-badge):last-child { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Auth Guard -->
+<div id="auth-guard">
+  <div class="spinner"></div>
+  <p>Verifying admin access...</p>
+</div>
+
+<!-- Navbar -->
+<nav class="nav" style="display:none" id="nav">
+  <div class="nav-brand">
+    <span>👑</span>
+    <span>DG DRIFT</span>
+    <span class="nav-badge">ADMIN</span>
+  </div>
+  <div class="nav-user">
+    <span class="nav-name" id="nav-user">...</span>
+    <button class="btn btn-outline btn-sm" onclick="goClient()">Client View</button>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- Layout -->
+<div class="layout" style="display:none" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <button class="sb-btn active" data-tab="overview" onclick="switchTab('overview')">
+      <span class="icon">📊</span><span>Overview</span>
+    </button>
+    <button class="sb-btn" data-tab="users" onclick="switchTab('users')">
+      <span class="icon">👥</span><span>Users</span>
+    </button>
+    <button class="sb-btn" data-tab="coupons" onclick="switchTab('coupons')">
+      <span class="icon">🎫</span><span>Coupons</span>
+    </button>
+    <button class="sb-btn" data-tab="bot" onclick="switchTab('bot')">
+      <span class="icon">🤖</span><span>Bot Accounts</span>
+    </button>
+    <button class="sb-btn" data-tab="settings" onclick="switchTab('settings')">
+      <span class="icon">⚙️</span><span>Settings</span>
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <section class="section active" id="tab-overview">
+      <h1>Overview</h1>
+      <p class="subtitle">Live system statistics</p>
+
+      <div class="stats" id="stats">
+        <div class="stat">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value blue" id="s-users">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Admins</div>
+          <div class="stat-value gold" id="s-admins">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Basic Credits (total)</div>
+          <div class="stat-value blue" id="s-basic">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Premium Credits (total)</div>
+          <div class="stat-value gold" id="s-premium">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Active Coupons</div>
+          <div class="stat-value green" id="s-active">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Used Coupons</div>
+          <div class="stat-value pink" id="s-used">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bot Accounts</div>
+          <div class="stat-value blue" id="s-bots">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bot Online</div>
+          <div class="stat-value green" id="s-bots-online">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Pending Clans</div>
+          <div class="stat-value pink" id="s-pending">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Uptime</div>
+          <div class="stat-value blue" id="s-uptime">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>⚡ Quick Actions</h2>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary" onclick="openCreateUser()">➕ Create User</button>
+          <button class="btn btn-primary" onclick="openCreateCoupon()">🎫 Generate Coupon</button>
+          <button class="btn btn-info" onclick="openJoinClan()">🏰 Join Clan</button>
+          <button class="btn btn-outline" onclick="loadOverview()">🔄 Refresh</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ USERS ═══ -->
+    <section class="section" id="tab-users">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h1>Users</h1>
+          <p class="subtitle">Manage all users, credits, and roles</p>
+        </div>
+        <div class="flex gap-2">
+          <input class="input" id="user-search" placeholder="Search..." oninput="filterUsers()" style="width:200px">
+          <button class="btn btn-primary" onclick="openCreateUser()">➕ Create</button>
+          <button class="btn btn-outline" onclick="loadUsers()">🔄</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Basic</th>
+                <th>Premium</th>
+                <th>Bot</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-body">
+              <tr><td colspan="7" class="empty"><div class="spinner" style="margin:0 auto"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ COUPONS ═══ -->
+    <section class="section" id="tab-coupons">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h1>Coupons</h1>
+          <p class="subtitle">Generate and manage gift coupons</p>
+        </div>
+        <div class="flex gap-2">
+          <input class="input" id="coupon-search" placeholder="Search code..." oninput="filterCoupons()" style="width:200px">
+          <button class="btn btn-primary" onclick="openCreateCoupon()">🎫 Generate</button>
+          <button class="btn btn-outline" onclick="loadCoupons()">🔄</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table id="coupons-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Credits</th>
+                <th>Created By</th>
+                <th>Status</th>
+                <th>Used By</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="coupons-body">
+              <tr><td colspan="7" class="empty"><div class="spinner" style="margin:0 auto"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BOT ACCOUNTS ═══ -->
+    <section class="section" id="tab-bot">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h1>Bot Accounts</h1>
+          <p class="subtitle">FreeFire accounts managed by the bot</p>
+        </div>
+        <button class="btn btn-outline" onclick="loadBotAccounts()">🔄 Refresh</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>UID</th>
+                <th>Nickname</th>
+                <th>Region</th>
+                <th>Level</th>
+                <th>Gained EXP</th>
+                <th>Matches</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bot-body">
+              <tr><td colspan="7" class="empty"><div class="spinner" style="margin:0 auto"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <section class="section" id="tab-settings">
+      <h1>Settings</h1>
+      <p class="subtitle">Account and system settings</p>
+
+      <div class="card" style="max-width:460px">
+        <h2>🔒 Change Password</h2>
+        <div class="group">
+          <label>Current Password</label>
+          <input type="password" class="input" id="cp-current" placeholder="Enter current password" autocomplete="current-password">
+        </div>
+        <div class="group">
+          <label>New Password</label>
+          <input type="password" class="input" id="cp-new" placeholder="Min 6 characters" autocomplete="new-password">
+        </div>
+        <div class="group">
+          <label>Confirm New Password</label>
+          <input type="password" class="input" id="cp-confirm" placeholder="Re-enter new password" autocomplete="new-password">
+        </div>
+        <p id="cp-error" class="text-sm text-danger" style="display:none"></p>
+        <button class="btn btn-primary" onclick="changePassword()" style="width:100%;margin-top:8px">Update Password</button>
+      </div>
+
+      <div class="card" style="max-width:460px">
+        <h2>ℹ️ System Info</h2>
+        <div class="text-sm" style="line-height:1.8">
+          <div class="flex justify-between"><span class="text-muted">Panel</span><span>DG DRIFT Admin v1.0</span></div>
+          <div class="flex justify-between"><span class="text-muted">Bot Mode</span><span>OB55 / Battle Royale</span></div>
+          <div class="flex justify-between"><span class="text-muted">Clan Join</span><span class="text-success">Enabled</span></div>
+          <div class="flex justify-between"><span class="text-muted">Session</span><span class="text-success">Active</span></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast Container -->
+<div id="toasts"></div>
+
+<!-- Modal Container -->
+<div id="modals"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentUser = null;
+let allUsers = [];
+let allCoupons = [];
+let allBots = [];
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function num(n) { return Number(n || 0).toLocaleString(); }
+function fmtDate(ts) {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts * 1000);
+    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  } catch { return '—'; }
+}
+function fmtUptime(sec) {
+  sec = Math.floor(sec || 0);
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function toast(msg, type = 'info', dur = 3000) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${esc(msg)}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('hide');
+    setTimeout(() => t.remove(), 250);
+  }, dur);
+}
+
+function openModal(html) {
+  document.getElementById('modals').innerHTML = `
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">${html}</div>
+    </div>`;
+}
+function closeModal() { document.getElementById('modals').innerHTML = ''; }
+
+async function copy(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Copied!', 'success');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    toast('Copied!', 'success');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════
+function goClient() { window.location.href = '/client'; }
+async function logout() {
+  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+  window.location.href = '/login';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
+  const section = document.getElementById(`tab-${tab}`);
+  const btn = document.querySelector(`.sb-btn[data-tab="${tab}"]`);
+  if (section) section.classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  if (tab === 'overview') loadOverview();
+  if (tab === 'users') loadUsers();
+  if (tab === 'coupons') loadCoupons();
+  if (tab === 'bot') loadBotAccounts();
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTH GUARD
+// ═══════════════════════════════════════════════════════════
+async function checkAuth() {
+  try {
+    const r = await fetch('/api/me');
+    if (!r.ok) { window.location.href = '/login'; return; }
+    currentUser = await r.json();
+    if (currentUser.role !== 'admin') { window.location.href = '/client'; return; }
+
+    document.getElementById('auth-guard').style.display = 'none';
+    document.getElementById('nav').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('nav-user').textContent = currentUser.display_name || currentUser.username;
+
+    loadOverview();
+    setInterval(() => {
+      const active = document.querySelector('.section.active');
+      if (active && active.id === 'tab-overview') loadOverview();
+    }, 15000);
+  } catch {
+    window.location.href = '/login';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════════
+async function loadOverview() {
+  try {
+    const r = await fetch('/api/admin/overview');
+    if (!r.ok) return;
+    const d = await r.json();
+    document.getElementById('s-users').textContent = num(d.total_users);
+    document.getElementById('s-admins').textContent = num(d.total_admins);
+    document.getElementById('s-basic').textContent = num(d.total_basic_credits);
+    document.getElementById('s-premium').textContent = num(d.total_premium_credits);
+    document.getElementById('s-active').textContent = num(d.active_coupons);
+    document.getElementById('s-used').textContent = num(d.used_coupons);
+    document.getElementById('s-bots').textContent = num(d.bot_accounts);
+    document.getElementById('s-bots-online').textContent = num(d.bot_online);
+    document.getElementById('s-pending').textContent = num(d.pending_clans || 0);
+    document.getElementById('s-uptime').textContent = fmtUptime(d.uptime);
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════════════════════════
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/admin/users');
+    if (!r.ok) return;
+    allUsers = await r.json();
+    renderUsers();
+  } catch { toast('Load failed', 'error'); }
+}
+
+function filterUsers() {
+  renderUsers(document.getElementById('user-search').value.toLowerCase());
+}
+
+function renderUsers(search = '') {
+  const body = document.getElementById('users-body');
+  let filtered = allUsers;
+  if (search) {
+    filtered = allUsers.filter(u =>
+      u.username.includes(search) || u.display_name.toLowerCase().includes(search)
+    );
+  }
+
+  if (!filtered.length) {
+    body.innerHTML = `<tr><td colspan="7" class="empty"><div class="icon">👥</div><div>No users</div></td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(u => `
+    <tr>
+      <td>
+        <div style="font-weight:600">${esc(u.display_name)}</div>
+        <div class="text-xs text-muted mono">${esc(u.username)}</div>
+      </td>
+      <td><span class="badge badge-${u.role}">${u.role}</span></td>
+      <td><span class="text-info" style="font-weight:700">🔵 ${num(u.basic_credits)}</span></td>
+      <td><span class="text-warning" style="font-weight:700">⭐ ${num(u.premium_credits)}</span></td>
+      <td>${u.bot_uid
+        ? `<div class="text-xs"><span class="mono">${esc(u.bot_uid)}</span> · ${esc(u.bot_nickname || '')}</div>
+           <span class="badge badge-${u.bot_status === 'ONLINE' || u.bot_status === 'IN_MATCH' ? 'online' : (u.bot_status === 'PAUSED' ? 'paused' : 'offline')}">${esc(u.bot_status)}</span>`
+        : '<span class="text-muted text-xs">—</span>'}</td>
+      <td class="text-muted text-xs">${fmtDate(u.created_at)}</td>
+      <td>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm" onclick='openCredits("${esc(u.username)}")'>💰</button>
+          <button class="btn btn-info btn-sm" onclick='openRole("${esc(u.username)}")'>🎭</button>
+          <button class="btn btn-danger btn-sm" onclick='confirmDeleteUser("${esc(u.username)}")'>🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCreateUser() {
+  openModal(`
+    <h3>➕ Create User</h3>
+    <div class="group">
+      <label>Username</label>
+      <input class="input" id="nu-username" placeholder="username (min 3 chars)">
+    </div>
+    <div class="group">
+      <label>Password</label>
+      <input class="input" id="nu-password" placeholder="min 6 characters">
+    </div>
+    <div class="row">
+      <div class="group">
+        <label>Role</label>
+        <select class="select" id="nu-role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="group">
+        <label>Basic Credits</label>
+        <input type="number" class="input" id="nu-basic" value="0" min="0">
+      </div>
+    </div>
+    <div class="group">
+      <label>Premium Credits</label>
+      <input type="number" class="input" id="nu-premium" value="0" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createUser()">Create</button>
+    </div>
+  `);
+}
+
+async function createUser() {
+  const username = document.getElementById('nu-username').value.trim();
+  const password = document.getElementById('nu-password').value;
+  const role = document.getElementById('nu-role').value;
+  const basic = parseInt(document.getElementById('nu-basic').value) || 0;
+  const premium = parseInt(document.getElementById('nu-premium').value) || 0;
+
+  if (!username || !password) { toast('Username & password required', 'error'); return; }
+  if (password.length < 6) { toast('Password too short', 'error'); return; }
+
+  try {
+    const r = await fetch('/api/admin/user/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, role, basic_credits: basic, premium_credits: premium })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(`Created: ${d.display_name}`, 'success');
+      closeModal(); loadUsers(); loadOverview();
+    } else {
+      toast(d.error || 'Failed', 'error');
+    }
+  } catch { toast('Network error', 'error'); }
+}
+
+function openCredits(username) {
+  const u = allUsers.find(x => x.username === username);
+  if (!u) return;
+  openModal(`
+    <h3>💰 Edit Credits — ${esc(u.display_name)}</h3>
+    <div class="text-sm text-muted mb-3">
+      Current: 🔵 ${num(u.basic_credits)} basic · ⭐ ${num(u.premium_credits)} premium
+    </div>
+    <div class="row">
+      <div class="group">
+        <label>Basic Credits</label>
+        <input type="number" class="input" id="ec-basic" value="0">
+      </div>
+      <div class="group">
+        <label>Premium Credits</label>
+        <input type="number" class="input" id="ec-premium" value="0">
+      </div>
+    </div>
+    <div class="group">
+      <label>Mode</label>
+      <select class="select" id="ec-mode">
+        <option value="add">Add / Subtract (delta)</option>
+        <option value="set">Set absolute value</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick='applyCredits("${esc(username)}")'>Apply</button>
+    </div>
+  `);
+}
+
+async function applyCredits(username) {
+  const basic = parseInt(document.getElementById('ec-basic').value) || 0;
+  const premium = parseInt(document.getElementById('ec-premium').value) || 0;
+  const mode = document.getElementById('ec-mode').value;
+
+  try {
+    const r = await fetch('/api/admin/user/credits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, basic_credits: basic, premium_credits: premium, mode })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(`Updated: 🔵 ${d.basic_credits} · ⭐ ${d.premium_credits}`, 'success');
+      closeModal(); loadUsers(); loadOverview();
+    } else {
+      toast(d.error || 'Failed', 'error');
+    }
+  } catch { toast('Network error', 'error'); }
+}
+
+function openRole(username) {
+  const u = allUsers.find(x => x.username === username);
+  if (!u) return;
+  openModal(`
+    <h3>🎭 Change Role — ${esc(u.display_name)}</h3>
+    <div class="group">
+      <label>New Role</label>
+      <select class="select" id="role-select">
+        <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick='applyRole("${esc(username)}")'>Apply</button>
+    </div>
+  `);
+}
+
+async function applyRole(username) {
+  const role = document.getElementById('role-select').value;
+  try {
+    const r = await fetch('/api/admin/user/role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, role })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(`Role: ${role}`, 'success');
+      closeModal(); loadUsers(); loadOverview();
+    } else toast(d.error || 'Failed', 'error');
+  } catch { toast('Network error', 'error'); }
+}
+
+function confirmDeleteUser(username) {
+  const u = allUsers.find(x => x.username === username);
+  if (!u) return;
+  openModal(`
+    <h3>🗑️ Delete User</h3>
+    <p style="color:#a0a0b0;margin-bottom:16px">
+      Delete <b style="color:#fff">${esc(u.display_name)}</b>?<br>
+      <span class="text-sm text-muted">This cannot be undone.</span>
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick='doDeleteUser("${esc(username)}")'>Delete</button>
+    </div>
+  `);
+}
+
+async function doDeleteUser(username) {
+  try {
+    const r = await fetch('/api/admin/user/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Deleted', 'success');
+      closeModal(); loadUsers(); loadOverview();
+    } else toast(d.error || 'Failed', 'error');
+  } catch { toast('Network error', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// COUPONS
+// ═══════════════════════════════════════════════════════════
+async function loadCoupons() {
+  try {
+    const r = await fetch('/api/admin/coupons');
+    if (!r.ok) return;
+    allCoupons = await r.json();
+    renderCoupons();
+  } catch { toast('Load failed', 'error'); }
+}
+
+function filterCoupons() {
+  renderCoupons(document.getElementById('coupon-search').value.toUpperCase());
+}
+
+function renderCoupons(search = '') {
+  const body = document.getElementById('coupons-body');
+  let filtered = allCoupons;
+  if (search) {
+    filtered = allCoupons.filter(c => c.code.includes(search));
+  }
+
+  if (!filtered.length) {
+    body.innerHTML = `<tr><td colspan="7" class="empty"><div class="icon">🎫</div><div>No coupons</div></td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(c => {
+    const credits = [];
+    if (c.basic_credits > 0) credits.push(`🔵 ${c.basic_credits}`);
+    if (c.premium_credits > 0) credits.push(`⭐ ${c.premium_credits}`);
+    return `
+    <tr>
+      <td><code>${esc(c.code)}</code></td>
+      <td>${credits.join(' + ') || '—'}</td>
+      <td class="text-sm text-muted">${esc(c.created_by || '—')}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td class="text-sm text-muted">${esc(c.used_by || '—')}</td>
+      <td class="text-muted text-xs">${fmtDate(c.created_at)}</td>
+      <td>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-outline btn-sm" onclick='copy("${esc(c.code)}")'>📋</button>
+          ${c.status === 'active'
+            ? `<button class="btn btn-danger btn-sm" onclick='confirmRevoke("${esc(c.code)}")'>Revoke</button>`
+            : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openCreateCoupon() {
+  const opts = allUsers.map(u =>
+    `<option value="${esc(u.username)}" ${u.username === currentUser.username ? 'selected' : ''}>
+      ${esc(u.display_name)} (🔵${u.basic_credits} ⭐${u.premium_credits})
+    </option>`
+  ).join('');
+
+  openModal(`
+    <h3>🎫 Generate Coupon</h3>
+    <div class="group">
+      <label>From User (credits deducted from)</label>
+      <select class="select" id="cm-user">${opts}</select>
+    </div>
+    <div class="row">
+      <div class="group">
+        <label>Basic Credits</label>
+        <input type="number" class="input" id="cm-basic" value="10" min="0">
+      </div>
+      <div class="group">
+        <label>Premium Credits</label>
+        <input type="number" class="input" id="cm-premium" value="0" min="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="doCreateCoupon()">Generate</button>
+    </div>
+  `);
+}
+
+async function doCreateCoupon() {
+  const forUser = document.getElementById('cm-user').value;
+  const basic = parseInt(document.getElementById('cm-basic').value) || 0;
+  const premium = parseInt(document.getElementById('cm-premium').value) || 0;
+
+  if (basic === 0 && premium === 0) { toast('At least 1 credit required', 'error'); return; }
+
+  try {
+    const r = await fetch('/api/admin/coupon/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ for_user: forUser, basic_credits: basic, premium_credits: premium })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      showCouponCreated(d.coupon);
+      loadCoupons(); loadOverview(); loadUsers();
+    } else toast(d.error || 'Failed', 'error');
+  } catch { toast('Network error', 'error'); }
+}
+
+function showCouponCreated(c) {
+  const credits = [];
+  if (c.basic_credits > 0) credits.push(`🔵 ${c.basic_credits} Basic`);
+  if (c.premium_credits > 0) credits.push(`⭐ ${c.premium_credits} Premium`);
+
+  openModal(`
+    <h3>🎉 Coupon Generated</h3>
+    <div class="code-box">
+      <div class="text-xs text-muted" style="margin-bottom:8px">Share this code</div>
+      <code>${esc(c.code)}</code>
+    </div>
+    <div class="text-center mb-3">
+      ${credits.map(x => `<span class="badge badge-active" style="margin:2px">${x}</span>`).join('')}
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick='copy("${esc(c.code)}")'>📋 Copy Code</button>
+      <button class="btn btn-outline" onclick="closeModal()">Done</button>
+    </div>
+  `);
+}
+
+function confirmRevoke(code) {
+  openModal(`
+    <h3>🚫 Revoke Coupon</h3>
+    <p style="color:#a0a0b0;margin-bottom:16px">
+      Revoke <b style="color:#fff" class="mono">${esc(code)}</b>?<br>
+      <span class="text-sm text-muted">Credits will be refunded to creator.</span>
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick='doRevoke("${esc(code)}")'>Revoke</button>
+    </div>
+  `);
+}
+
+async function doRevoke(code) {
+  try {
+    const r = await fetch('/api/admin/coupon/revoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Revoked & refunded', 'success');
+      closeModal(); loadCoupons(); loadOverview(); loadUsers();
+    } else toast(d.error || 'Failed', 'error');
+  } catch { toast('Network error', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOT ACCOUNTS
+// ═══════════════════════════════════════════════════════════
+async function loadBotAccounts() {
+  try {
+    const r = await fetch('/api/admin/bot-accounts');
+    if (!r.ok) return;
+    allBots = await r.json();
+    renderBots();
+  } catch { toast('Load failed', 'error'); }
+}
+
+function renderBots() {
+  const body = document.getElementById('bot-body');
+  if (!allBots.length) {
+    body.innerHTML = `<tr><td colspan="7" class="empty">
+      <div class="icon">🤖</div>
+      <div>No bot accounts</div>
+      <div class="text-xs text-muted mt-2">Add accounts via /bot panel</div>
+    </td></tr>`;
+    return;
+  }
+
+  body.innerHTML = allBots.map(b => {
+    const badgeClass = b.is_paused ? 'paused' :
+      (b.status === 'ONLINE' || b.status === 'IN_MATCH' ? 'online' : 'offline');
+    const statusText = b.is_paused ? 'PAUSED' : b.status;
+    return `
+    <tr>
+      <td><code>${esc(b.uid)}</code></td>
+      <td>${esc(b.nickname || '—')}</td>
+      <td><span class="badge badge-user">${esc(b.region || '—')}</span></td>
+      <td>${b.level || 0}</td>
+      <td class="text-success" style="font-weight:700">+${num(b.gained_exp)}</td>
+      <td>${b.matches_played || 0}</td>
+      <td><span class="badge badge-${badgeClass}">${esc(statusText)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// JOIN CLAN (Manual)
+// ═══════════════════════════════════════════════════════════
+function openJoinClan() {
+  openModal(`
+    <h3>🏰 Manual Clan Join</h3>
+    <p class="text-sm text-muted mb-3">Trigger bots to join a clan immediately (OB55)</p>
+    <div class="group">
+      <label>Clan ID</label>
+      <input class="input" id="jc-clan" placeholder="e.g. 3033431593">
+    </div>
+    <div class="group">
+      <label>Region</label>
+      <select class="select" id="jc-region">
+        <option value="IND">IND</option>
+        <option value="BD">BD</option>
+        <option value="ME">ME</option>
+        <option value="BR">BR</option>
+        <option value="ID">ID</option>
+        <option value="PK">PK</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="doJoinClan()">Join Now</button>
+    </div>
+  `);
+}
+
+async function doJoinClan() {
+  const clan_id = document.getElementById('jc-clan').value.trim();
+  const region = document.getElementById('jc-region').value;
+  if (!clan_id) { toast('Clan ID required', 'error'); return; }
+
+  try {
+    const r = await fetch('/api/admin/join-clan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clan_id, region })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      closeModal();
+      showJoinResult(d);
+    } else toast(d.error || 'Failed', 'error');
+  } catch { toast('Network error', 'error'); }
+}
+
+function showJoinResult(d) {
+  const rows = (d.results || []).map(x => `
+    <tr>
+      <td><code>${esc(x.account_id)}</code></td>
+      <td>${esc(x.nickname || '—')}</td>
+      <td><span class="badge badge-${x.success ? 'online' : 'offline'}">${x.success ? 'OK' : 'FAIL'}</span></td>
+      <td class="text-xs text-muted">${esc(x.error || ('code ' + (x.status_code || '')))}</td>
+    </tr>
+  `).join('');
+
+  openModal(`
+    <h3>🏰 Join Results</h3>
+    <div class="stats" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:16px">
+      <div class="stat"><div class="stat-label">Total</div><div class="stat-value blue">${d.total || 0}</div></div>
+      <div class="stat"><div class="stat-label">Success</div><div class="stat-value green">${d.success || 0}</div></div>
+      <div class="stat"><div class="stat-label">Failed</div><div class="stat-value pink">${d.failed || 0}</div></div>
+    </div>
+    ${d.error ? `<div class="text-sm text-danger mb-3">${esc(d.error)}</div>` : ''}
+    <div class="table-wrap" style="max-height:300px;overflow:auto;border-radius:8px;border:1px solid var(--border)">
+      <table>
+        <thead><tr><th>UID</th><th>Nick</th><th>Status</th><th>Info</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4" class="empty">No results</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()" style="flex:1">Close</button>
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHANGE PASSWORD
+// ═══════════════════════════════════════════════════════════
+async function changePassword() {
+  const cur = document.getElementById('cp-current').value;
+  const nw = document.getElementById('cp-new').value;
+  const cf = document.getElementById('cp-confirm').value;
+  const err = document.getElementById('cp-error');
+  err.style.display = 'none';
+
+  if (!cur || !nw || !cf) {
+    err.textContent = 'All fields required'; err.style.display = 'block'; return;
+  }
+  if (nw !== cf) {
+    err.textContent = 'Passwords do not match'; err.style.display = 'block'; return;
+  }
+  if (nw.length < 6) {
+    err.textContent = 'Min 6 characters'; err.style.display = 'block'; return;
+  }
+
+  try {
+    const r = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: cur, new_password: nw })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Password changed!', 'success');
+      document.getElementById('cp-current').value = '';
+      document.getElementById('cp-new').value = '';
+      document.getElementById('cp-confirm').value = '';
+    } else {
+      err.textContent = d.error || 'Failed'; err.style.display = 'block';
+    }
+  } catch {
+    err.textContent = 'Network error'; err.style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+checkAuth();
+</script>
+</body>
+</html>
